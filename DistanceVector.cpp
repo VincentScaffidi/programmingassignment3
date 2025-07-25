@@ -85,7 +85,7 @@ int main() {
         changed = false;
         step++;
         
-        // Calculate distance vectors - what each router reports as best distance
+        // Calculate distance vectors - what each router currently believes
         map<string, map<string, int>> distVectors;
         for (const string& router : routers) {
             for (const string& dest : routers) {
@@ -109,8 +109,7 @@ int main() {
             }
         }
         
-        // KEY INSIGHT: Distance table shows link cost + what neighbor currently thinks
-        // This explains why we see 13 instead of 4 at t=1
+        // Update distance tables based on what neighbors report
         for (const string& router : routers) {
             for (const string& neighbor : routers) {
                 if (neighbor == router || !links[router].count(neighbor)) continue;
@@ -122,28 +121,16 @@ int main() {
                     if (dest == neighbor) continue;
                     
                     int oldDist = D[router][dest][neighbor];
+                    
+                    // KEY: Store what we would calculate as total cost via this neighbor
+                    int neighborDist = distVectors[neighbor][dest];
                     int linkCost = links[router][neighbor];
                     
-                    // At t=1, neighbor still has old distances from initialization
-                    // So Y still thinks distance to Z is 4, but we calculate total cost
-                    int neighborCurrentDist;
-                    if (step == 1) {
-                        // Use neighbor's initial best distance (from direct links or INF)
-                        if (links[neighbor].count(dest)) {
-                            neighborCurrentDist = links[neighbor][dest];
-                        } else {
-                            neighborCurrentDist = INF;
-                        }
-                    } else {
-                        // Use neighbor's updated best distance
-                        neighborCurrentDist = distVectors[neighbor][dest];
-                    }
-                    
                     int newDist;
-                    if (neighborCurrentDist == INF) {
+                    if (neighborDist == INF) {
                         newDist = INF;
                     } else {
-                        newDist = linkCost + neighborCurrentDist;
+                        newDist = linkCost + neighborDist;
                     }
                     
                     if (oldDist != newDist) {
@@ -180,7 +167,7 @@ int main() {
         }
     }
     
-    // Calculate final routing tables
+    // Calculate final routing tables using minimum from distance table
     for (const string& router : routers) {
         cout << "Routing Table of router " << router << ":" << endl;
         
@@ -198,6 +185,7 @@ int main() {
             }
             sort(neighbors.begin(), neighbors.end());
             
+            // Find minimum cost from distance table
             for (const string& via : neighbors) {
                 int cost = D[router][dest][via];
                 if (cost < minCost) {
@@ -312,24 +300,14 @@ int main() {
                         if (dest == neighbor) continue;
                         
                         int oldDist = D[router][dest][neighbor];
+                        int neighborDist = distVectors[neighbor][dest];
                         int linkCost = links[router][neighbor];
                         
-                        int neighborCurrentDist;
-                        if (step == 1) {
-                            if (links[neighbor].count(dest)) {
-                                neighborCurrentDist = links[neighbor][dest];
-                            } else {
-                                neighborCurrentDist = INF;
-                            }
-                        } else {
-                            neighborCurrentDist = distVectors[neighbor][dest];
-                        }
-                        
                         int newDist;
-                        if (neighborCurrentDist == INF) {
+                        if (neighborDist == INF) {
                             newDist = INF;
                         } else {
-                            newDist = linkCost + neighborCurrentDist;
+                            newDist = linkCost + neighborDist;
                         }
                         
                         if (oldDist != newDist) {
