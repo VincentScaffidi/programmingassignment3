@@ -57,8 +57,8 @@ Y,Y,4
 
 Distance Table of router X at t=3:
      Y    Z    
-Y    3    13   
-Z    13   1    
+Y    3    5    
+Z    7    1    
 
 Distance Table of router Y at t=3:
      X    Z    
@@ -104,7 +104,7 @@ Routing Table of router X:
 Y,Y,3
 Z,Z,1
 
-Routing Table of router Y:
+Routing Table of router Y:x
 X,X,3
 Z,X,4
 
