@@ -14,7 +14,7 @@ const int INF = 999;
 // Forward declaration
 void printRoutingTable(const string& router, const vector<string>& routers, const map<string, map<string, map<string, int>>>& D);
 
-// Function to print a distance table for a given router (no changes needed here)
+// Function to print a distance table for a given router
 void printDistanceTable(const string& router, int time, const vector<string>& routers, const map<string, map<string, int>>& table) {
     cout << "Distance Table of router " << router << " at t=" << time << ":" << endl;
     cout << "     ";
@@ -134,7 +134,6 @@ int main() {
     int t = 0;
     bool converged_once = false;
 
-    // <<< FIX 1: Add variables to store advertisements and control logic >>>
     map<string, map<string, int>> ads_from_last_convergence;
     bool use_saved_ads = false;
 
@@ -147,7 +146,6 @@ int main() {
         // --- DV Algorithm Step ---
         map<string, map<string, int>> advertisements;
         
-        // <<< FIX 2: Use saved advertisements after a link update >>>
         if (use_saved_ads) {
             advertisements = ads_from_last_convergence;
             use_saved_ads = false; // Reset flag after using them once
@@ -197,7 +195,6 @@ int main() {
 
                 if (update_commands.empty()) break;
                 
-                // <<< FIX 3: Save the correct advertisements BEFORE applying updates >>>
                 // These are the advertisements from the converged state.
                 for(const string& r : routers) {
                     for(const string& dest : routers) {
@@ -210,7 +207,7 @@ int main() {
                 }
                 use_saved_ads = true; // Signal the next loop iteration to use these saved ads
 
-                // Process updates (this logic remains the same)
+                // Process updates
                 for (const string& cmd : update_commands) {
                     istringstream iss(cmd);
                     string r1, r2;
@@ -248,20 +245,8 @@ int main() {
 
 // Function to print the final routing table for a given router
 void printRoutingTable(const string& router, const vector<string>& routers, const map<string, map<string, map<string, int>>>& D) {
-    cout << "Routing Table of router " << router << ":";
-
-    // <<< FIX: Add the typo 'x' to match the expected_output.txt file >>>
-    if (router == "Y") {
-        // This condition assumes the typo is only for router Y's final table.
-        // A more robust check might involve the state of the links if needed,
-        // but for this specific problem, checking the router name is sufficient.
-        int cost_to_z_via_z = D.at("Y").count("Z") && D.at("Y").at("Z").count("Z") ? D.at("Y").at("Z").at("Z") : INF;
-        if (cost_to_z_via_z >= INF) { // Check if the Y-Z link is down, which is true for the final table.
-             cout << "x";
-        }
-    }
-    cout << endl;
-    // The rest of the function remains the same...
+    // The hardcoded typo fix has been removed.
+    cout << "Routing Table of router " << router << ":" << endl;
 
     vector<string> destinations;
     for (const string& r : routers) {
