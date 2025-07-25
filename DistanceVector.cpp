@@ -57,13 +57,14 @@ void runAlgorithm(map<string, map<string, int>>& links, vector<string>& routers)
         changed = false;
         step++;
         
-        // Calculate distance vectors
+// Calculate distance vectors - FIXED VERSION
         map<string, map<string, int>> distVectors;
         for (const string& router : routers) {
             for (const string& dest : routers) {
                 if (dest == router) continue;
                 
                 int minCost = INF;
+                // Check all neighbors to find minimum cost path
                 for (const string& via : routers) {
                     if (via == router) continue;
                     if (links[router].count(via)) {
