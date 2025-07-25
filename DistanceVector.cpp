@@ -4,256 +4,260 @@
 #include <map>
 #include <algorithm>
 #include <sstream>
-#include <iomanip>
 
 using namespace std;
 
 const int INF = 999999;
 
-class Router {
-public:
-    string name;
-    map<string, int> directLinks;
-    map<string, map<string, int>> distanceTable;
-    map<string, int> bestDistances;
-    map<string, string> nextHop;
-
-    Router() = default; 
-
-    Router(string n) : name(n) {}
-
-
-    void initialize(const vector<string>& allRouters) {
-        bestDistances.clear();
-        nextHop.clear();
-        distanceTable.clear();
-
-        for (const string& dest : allRouters) {
-            if (dest == name) continue;
-
-            bestDistances[dest] = INF;
-            nextHop[dest] = "";
-
-            for (const string& hop : allRouters) {
-                if (hop == name) continue;
-                distanceTable[dest][hop] = INF;
-            }
-
-            if (directLinks.count(dest)) {
-                distanceTable[dest][dest] = directLinks[dest];
-                bestDistances[dest] = directLinks[dest];
-                nextHop[dest] = dest;
+int main() {
+    map<string, map<string, int>> links;
+    vector<string> routers;
+    map<string, map<string, map<string, int>>> D;
+    string line;
+    
+    // Read router names
+    while (getline(cin, line)) {
+        if (line == "START") break;
+        if (!line.empty()) {
+            routers.push_back(line);
+        }
+    }
+    sort(routers.begin(), routers.end());
+    
+    // Read initial topology
+    while (getline(cin, line) && line != "UPDATE") {
+        istringstream iss(line);
+        string r1, r2;
+        int cost;
+        if (iss >> r1 >> r2 >> cost) {
+            if (cost == -1) {
+                links[r1].erase(r2);
+                links[r2].erase(r1);
+            } else {
+                links[r1][r2] = cost;
+                links[r2][r1] = cost;
             }
         }
     }
-
-    void printDistanceTable(int step, const vector<string>& allRouters) {
-        cout << "Distance Table of router " << name << " at t=" << step << ":" << endl;
-        cout << "     ";
-        for (const string& dest : allRouters) {
-            if (dest != name) {
-                cout << setw(5) << dest;
+    
+    // Initialize distance tables
+    for (const string& router : routers) {
+        for (const string& dest : routers) {
+            if (dest == router) continue;
+            for (const string& via : routers) {
+                if (via == router) continue;
+                D[router][dest][via] = INF;
             }
+            D[router][dest][dest] = links[router].count(dest) ? links[router][dest] : INF;
         }
-        cout << endl;
-
-        for (const string& hop : allRouters) {
-            if (hop == name) continue;
-            cout << setw(5) << hop;
-            for (const string& dest : allRouters) {
-                if (dest == name) continue;
-                int dist = distanceTable[dest][hop];
-                if (dist == INF) {
-                    cout << setw(5) << "INF";
+    }
+    
+    // Function to print distance tables
+    auto printDistanceTables = [&](int step) {
+        for (const string& router : routers) {
+            cout << "Distance Table of router " << router << " at t=" << step << ":" << endl;
+            cout << "     ";
+            for (const string& dest : routers) {
+                if (dest != router) cout << dest << "    ";
+            }
+            cout << endl;
+            
+            for (const string& via : routers) {
+                if (via == router) continue;
+                cout << via << "    ";
+                for (const string& dest : routers) {
+                    if (dest == router) continue;
+                    int cost = D[router][dest][via];
+                    if (cost == INF) cout << "INF  ";
+                    else cout << cost << "    ";
+                }
+                cout << endl;
+            }
+            cout << endl;
+        }
+    };
+    
+    // Function to print routing tables
+    auto printRoutingTables = [&]() {
+        for (const string& router : routers) {
+            cout << "Routing Table of router " << router << ":" << endl;
+            
+            for (const string& dest : routers) {
+                if (dest == router) continue;
+                
+                int minCost = INF;
+                string nextHop = "";
+                
+                vector<string> neighbors;
+                for (const string& via : routers) {
+                    if (via != router && links[router].count(via)) {
+                        neighbors.push_back(via);
+                    }
+                }
+                sort(neighbors.begin(), neighbors.end());
+                
+                for (const string& via : neighbors) {
+                    int cost = D[router][dest][via];
+                    if (cost < minCost || (cost == minCost && via < nextHop)) {
+                        minCost = cost;
+                        nextHop = via;
+                    }
+                }
+                
+                if (minCost == INF) {
+                    cout << dest << ",INF,INF" << endl;
                 } else {
-                    cout << setw(5) << dist;
+                    cout << dest << "," << nextHop << "," << minCost << endl;
                 }
             }
             cout << endl;
         }
-        cout << endl;
-    }
-
-    bool updateFromNeighbor(const string& neighbor, const map<string, int>& neighborDistances) {
-        bool changed = false;
-
-        for (const auto& entry : neighborDistances) {
-            string dest = entry.first;
-            int neighborDist = entry.second;
-            if (dest == name) continue;
-
-            distanceTable[dest][neighbor] = neighborDist;
-        }
-
-        for (const auto& entry : bestDistances) {
-            string dest = entry.first;
-            int oldBest = bestDistances[dest];
-            int newBest = INF;
-            string newNextHop = "";
-
-            vector<string> neighbors;
-            for (const auto& link : directLinks) {
-                neighbors.push_back(link.first);
-            }
-            sort(neighbors.begin(), neighbors.end());
-
-            for (const string& neighbor : neighbors) {
-                int costToNeighbor = directLinks[neighbor];
-                int neighborToDest = distanceTable[dest][neighbor];
-
-                if (costToNeighbor != INF && neighborToDest != INF) {
-                    int totalCost = costToNeighbor + neighborToDest;
-                    if (totalCost < newBest || (totalCost == newBest && neighbor < newNextHop)) {
-                        newBest = totalCost;
-                        newNextHop = neighbor;
+    };
+    
+    // Print initial tables
+    printDistanceTables(0);
+    
+    // Run Distance Vector algorithm
+    int step = 0;
+    bool changed = true;
+    
+    while (changed) {
+        changed = false;
+        step++;
+        
+        // Calculate new distance vectors
+        map<string, map<string, int>> newD;
+        for (const string& router : routers) {
+            for (const string& dest : routers) {
+                if (dest == router) continue;
+                
+                int minCost = INF;
+                for (const string& via : routers) {
+                    if (via == router || !links[router].count(via)) continue;
+                    int linkCost = links[router][via];
+                    int neighborCost = D[via][dest][dest]; // Use neighbor's direct cost
+                    if (neighborCost != INF && linkCost != INF) {
+                        int totalCost = linkCost + neighborCost;
+                        if (totalCost < minCost) {
+                            minCost = totalCost;
+                        }
                     }
                 }
-            }
-
-            if (newBest != oldBest || nextHop[dest] != newNextHop) {
-                bestDistances[dest] = newBest;
-                nextHop[dest] = newNextHop;
-                changed = true;
+                newD[router][dest] = minCost;
             }
         }
-
-        return changed;
-    }
-
-    map<string, int> getDistanceVector() {
-        return bestDistances;
-    }
-
-    void printRoutingTable(const vector<string>& allRouters) {
-        cout << "Routing Table of router " << name << ":" << endl;
-        for (const string& dest : allRouters) {
-            if (dest == name) continue;
-
-            if (bestDistances[dest] == INF) {
-                cout << dest << ",INF,INF" << endl;
-            } else {
-                cout << dest << "," << nextHop[dest] << "," << bestDistances[dest] << endl;
-            }
-        }
-        cout << endl;
-    }
-};
-
-class Network {
-private:
-    map<string, Router> routers;
-    vector<string> routerNames;
-
-public:
-    void addRouter(const string& name) {
-        if (routers.find(name) == routers.end()) {
-            routers[name] = Router(name);
-            routerNames.push_back(name);
-            sort(routerNames.begin(), routerNames.end());
-        }
-    }
-
-    void addLink(const string& router1, const string& router2, int cost) {
-        addRouter(router1);
-        addRouter(router2);
-
-        if (cost == -1) {
-            routers[router1].directLinks.erase(router2);
-            routers[router2].directLinks.erase(router1);
-        } else {
-            routers[router1].directLinks[router2] = cost;
-            routers[router2].directLinks[router1] = cost;
-        }
-    }
-
-    void initializeRouters() {
-        for (auto& pair : routers) {
-            pair.second.initialize(routerNames);
-        }
-    }
-
-    void runDistanceVector() {
-        initializeRouters();
-
-        int step = 0;
-        bool changed = true;
-
-        for (const string& name : routerNames) {
-            routers[name].printDistanceTable(step, routerNames);
-        }
-
-        while (changed) {
-            changed = false;
-            step++;
-
-            map<string, map<string, int>> distanceVectors;
-            for (const string& name : routerNames) {
-                distanceVectors[name] = routers[name].getDistanceVector();
-            }
-
-            for (const string& name : routerNames) {
-                Router& router = routers[name];
-
-                for (const auto& link : router.directLinks) {
-                    string neighbor = link.first;
-                    if (router.updateFromNeighbor(neighbor, distanceVectors[neighbor])) {
+        
+        // Update distance tables
+        for (const string& router : routers) {
+            for (const string& dest : routers) {
+                if (dest == router) continue;
+                for (const string& via : routers) {
+                    if (via == router || !links[router].count(via)) continue;
+                    int oldCost = D[router][dest][via];
+                    int newCost = newD[router][dest];
+                    if (newCost != oldCost) {
+                        D[router][dest][via] = newCost;
                         changed = true;
                     }
                 }
             }
-
+        }
+        
+        if (changed) {
+            printDistanceTables(step);
+        }
+    }
+    
+    // Print final routing tables
+    printRoutingTables();
+    
+    // Handle updates section
+    bool hasUpdates = false;
+    while (getline(cin, line) && line != "END") {
+        istringstream iss(line);
+        string r1, r2;
+        int cost;
+        if (iss >> r1 >> r2 >> cost) {
+            hasUpdates = true;
+            if (cost == -1) {
+                links[r1].erase(r2);
+                links[r2].erase(r1);
+            } else {
+                links[r1][r2] = cost;
+                links[r2][r1] = cost;
+            }
+        }
+    }
+    
+    if (hasUpdates) {
+        // Reset step counter
+        step = 0;
+        
+        // Reinitialize distance tables
+        for (const string& router : routers) {
+            for (const string& dest : routers) {
+                if (dest == router) continue;
+                for (const string& via : routers) {
+                    if (via == router) continue;
+                    D[router][dest][via] = INF;
+                }
+                D[router][dest][dest] = links[router].count(dest) ? links[router][dest] : INF;
+            }
+        }
+        
+        // Print initial tables for update
+        printDistanceTables(0);
+        
+        // Run algorithm again
+        changed = true;
+        while (changed) {
+            changed = false;
+            step++;
+            
+            map<string, map<string, int>> newD;
+            for (const string& router : routers) {
+                for (const string& dest : routers) {
+                    if (dest == router) continue;
+                    
+                    int minCost = INF;
+                    for (const string& via : routers) {
+                        if (via == router || !links[router].count(via)) continue;
+                        int linkCost = links[router][via];
+                        int neighborCost = D[via][dest][dest];
+                        if (neighborCost != INF && linkCost != INF) {
+                            int totalCost = linkCost + neighborCost;
+                            if (totalCost < minCost) {
+                                minCost = totalCost;
+                            }
+                        }
+                    }
+                    newD[router][dest] = minCost;
+                }
+            }
+            
+            for (const string& router : routers) {
+                for (const string& dest : routers) {
+                    if (dest == router) continue;
+                    for (const string& via : routers) {
+                        if (via == router || !links[router].count(via)) continue;
+                        int oldCost = D[router][dest][via];
+                        int newCost = newD[router][dest];
+                        if (newCost != oldCost) {
+                            D[router][dest][via] = newCost;
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            
             if (changed) {
-                for (const string& name : routerNames) {
-                    routers[name].printDistanceTable(step, routerNames);
-                }
+                printDistanceTables(step);
             }
         }
-
-        for (const string& name : routerNames) {
-            routers[name].printRoutingTable(routerNames);
-        }
+        
+        // Print final routing tables
+        printRoutingTables();
     }
-};
-
-int main() {
-    Network network;
-    string line;
-
-    while (getline(cin, line)) {
-        if (line == "START") {
-            while (getline(cin, line) && line != "UPDATE") {
-                istringstream iss(line);
-                string router1, router2;
-                int cost;
-
-                if (iss >> router1 >> router2 >> cost) {
-                    network.addLink(router1, router2, cost);
-                }
-            }
-
-            network.runDistanceVector();
-
-            bool hasUpdates = false;
-            while (getline(cin, line) && line != "END") {
-                istringstream iss(line);
-                string router1, router2;
-                int cost;
-
-                if (iss >> router1 >> router2 >> cost) {
-                    network.addLink(router1, router2, cost);
-                    hasUpdates = true;
-                }
-            }
-
-            if (hasUpdates) {
-                network.runDistanceVector();
-            }
-
-            break;
-        } else if (!line.empty()) {
-            network.addRouter(line);
-        }
-    }
-
+    
     return 0;
 }
