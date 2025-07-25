@@ -9,36 +9,8 @@ using namespace std;
 
 const int INF = 999999;
 
-int main() {
-    map<string, map<string, int>> links;
-    vector<string> routers;
+void runAlgorithm(map<string, map<string, int>>& links, vector<string>& routers) {
     map<string, map<string, map<string, int>>> D;
-    string line;
-    
-    // Read router names
-    while (getline(cin, line)) {
-        if (line == "START") break;
-        if (!line.empty()) {
-            routers.push_back(line);
-        }
-    }
-    sort(routers.begin(), routers.end());
-    
-    // Read initial topology
-    while (getline(cin, line) && line != "UPDATE") {
-        istringstream iss(line);
-        string r1, r2;
-        int cost;
-        if (iss >> r1 >> r2 >> cost) {
-            if (cost == -1) {
-                links[r1].erase(r2);
-                links[r2].erase(r1);
-            } else {
-                links[r1][r2] = cost;
-                links[r2][r1] = cost;
-            }
-        }
-    }
     
     // Initialize distance tables
     for (const string& router : routers) {
@@ -190,6 +162,62 @@ int main() {
             }
         }
         cout << endl;
+    }
+}
+
+int main() {
+    map<string, map<string, int>> links;
+    vector<string> routers;
+    string line;
+    
+    // Read router names
+    while (getline(cin, line)) {
+        if (line == "START") break;
+        if (!line.empty()) {
+            routers.push_back(line);
+        }
+    }
+    sort(routers.begin(), routers.end());
+    
+    // Read initial topology
+    while (getline(cin, line) && line != "UPDATE") {
+        istringstream iss(line);
+        string r1, r2;
+        int cost;
+        if (iss >> r1 >> r2 >> cost) {
+            if (cost == -1) {
+                links[r1].erase(r2);
+                links[r2].erase(r1);
+            } else {
+                links[r1][r2] = cost;
+                links[r2][r1] = cost;
+            }
+        }
+    }
+    
+    // Run algorithm with initial topology
+    runAlgorithm(links, routers);
+    
+    // Handle updates
+    bool hasUpdates = false;
+    while (getline(cin, line) && line != "END") {
+        istringstream iss(line);
+        string r1, r2;
+        int cost;
+        if (iss >> r1 >> r2 >> cost) {
+            hasUpdates = true;
+            if (cost == -1) {
+                links[r1].erase(r2);
+                links[r2].erase(r1);
+            } else {
+                links[r1][r2] = cost;
+                links[r2][r1] = cost;
+            }
+        }
+    }
+    
+    if (hasUpdates) {
+        runAlgorithm(links, routers);
     }
     
     return 0;
