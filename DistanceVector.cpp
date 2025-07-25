@@ -44,6 +44,9 @@ public:
             }
         }
     }
+    
+    // Core DV algorithm: Update distance table based on neighbor's distance vector
+    // This implements the Bellman-Ford equation: D_x(y) = min_v{c(x,v) + D_v(y)}
     bool updateFromNeighbor(const string& neighbor, const map<string, int>& neighborDistances) {
         bool changed = false;
         
@@ -85,6 +88,7 @@ public:
                     }
                 }
             }
+            
             // Check if anything changed (for convergence detection)
             if (newBest != oldBest || nextHop[dest] != newNextHop) {
                 bestDistances[dest] = newBest;
@@ -100,7 +104,6 @@ public:
     map<string, int> getDistanceVector() {
         return bestDistances;
     }
-
 
     // Print distance table in required format
     void printDistanceTable(int step, const vector<string>& allRouters) {
@@ -196,18 +199,58 @@ public:
         }
     }
     
-    // TODO: Implement the actual Distance Vector algorithm
+    // Main Distance Vector algorithm implementation
     void runDistanceVector() {
         initializeRouters();
         
-        // Print initial state
+        int step = 0;
+        bool changed = true;
+        
+        // Print initial distance tables (t=0)
         for (const string& name : routerNames) {
-            routers[name].printDistanceTable(0, routerNames);
+            routers[name].printDistanceTable(step, routerNames);
+        }
+        
+        // Run algorithm until convergence (no changes)
+        while (changed) {
+            changed = false;
+            step++;
+            
+            // Synchronous update: all routers send distance vectors simultaneously
+            map<string, map<string, int>> distanceVectors;
+            for (const string& name : routerNames) {
+                distanceVectors[name] = routers[name].getDistanceVector();
+            }
+            
+            // Each router processes updates from all its neighbors
+            for (const string& name : routerNames) {
+                Router& router = routers[name];
+                
+                // Process distance vectors from all direct neighbors
+                for (const auto& link : router.directLinks) {
+                    string neighbor = link.first;
+                    if (router.updateFromNeighbor(neighbor, distanceVectors[neighbor])) {
+                        changed = true; // At least one router changed
+                    }
+                }
+            }
+            
+            // Print distance tables if there were changes
+            if (changed) {
+                for (const string& name : routerNames) {
+                    routers[name].printDistanceTable(step, routerNames);
+                }
+            }
+        }
+        
+        // Print final routing tables after convergence
+        for (const string& name : routerNames) {
+            routers[name].printRoutingTable(routerNames);
         }
     }
 };
 
-/ Complete main function with full input handling
+// Complete main function with full input handling
 int main() {
     Network network;
     string line;
