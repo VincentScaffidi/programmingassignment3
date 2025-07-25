@@ -134,6 +134,25 @@ public:
         }
         cout << endl;
     }
+
+    // Print final routing table in required format: dest,nextHop,cost
+    void printRoutingTable(const vector<string>& allRouters) {
+        cout << "Routing Table of router " << name << ":" << endl;
+        
+        // Print destinations in alphabetical order
+        for (const string& dest : allRouters) {
+            if (dest == name) continue; // Skip self
+            
+            if (bestDistances[dest] == INF) {
+                // Unreachable destination
+                cout << dest << ",INF,INF" << endl;
+            } else {
+                // Reachable destination: dest,nextHop,totalCost
+                cout << dest << "," << nextHop[dest] << "," << bestDistances[dest] << endl;
+            }
+        }
+        cout << endl; // Blank line after each routing table
+    }
 };
 
 class Network {
