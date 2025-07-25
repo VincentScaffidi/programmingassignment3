@@ -17,6 +17,10 @@ public:
     map<string, int> bestDistances;         // Best known distance to each destination
     map<string, string> nextHop;            // Best next hop for each destination
     
+    // Default constructor needed for map operations
+    Router() : name("") {}
+    
+    // Parameterized constructor
     Router(string n) : name(n) {}
     
     // Initialize distance table for all known routers
@@ -168,7 +172,7 @@ public:
     // Maintains alphabetical ordering for consistent output
     void addRouter(const string& name) {
         if (routers.find(name) == routers.end()) {
-            routers[name] = Router(name);
+            routers[name] = Router(name);  // This now works with default constructor
             routerNames.push_back(name);
             sort(routerNames.begin(), routerNames.end()); // Keep alphabetical order
         }
