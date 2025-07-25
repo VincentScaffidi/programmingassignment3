@@ -48,9 +48,7 @@ int main() {
                 if (via == router) continue;
                 D[router][dest][via] = INF;
             }
-            if (links[router].count(dest)) {
-                D[router][dest][dest] = links[router][dest];
-            }
+            D[router][dest][dest] = links[router].count(dest) ? links[router][dest] : INF;
         }
     }
     
@@ -96,8 +94,8 @@ int main() {
                     if (via == router) continue;
                     if (links[router].count(via)) {
                         int linkCost = links[router][via];
-                        int pathCost = D[router][dest][via];
-                        if (linkCost != INF && pathCost != INF) {
+                        int pathCost = D[via][dest][dest]; // Use neighbor's reported distance
+                        if (pathCost != INF && linkCost != INF) {
                             int totalCost = linkCost + pathCost;
                             if (totalCost < minCost) {
                                 minCost = totalCost;
@@ -105,7 +103,7 @@ int main() {
                         }
                     }
                 }
-                distVectors[router][dest] = minCost;
+                distVectors[router][dest] = minCost == INF && links[router].count(dest) ? links[router][dest] : minCost;
             }
         }
         
@@ -115,23 +113,13 @@ int main() {
                 if (neighbor == router || !links[router].count(neighbor)) continue;
                 
                 for (const string& dest : routers) {
-                    if (dest == router) continue;
-                    
-                    // Don't overwrite direct costs
-                    if (dest == neighbor) continue;
+                    if (dest == router || dest == neighbor) continue;
                     
                     int oldDist = D[router][dest][neighbor];
-                    
-                    // KEY: Store what we would calculate as total cost via this neighbor
                     int neighborDist = distVectors[neighbor][dest];
                     int linkCost = links[router][neighbor];
                     
-                    int newDist;
-                    if (neighborDist == INF) {
-                        newDist = INF;
-                    } else {
-                        newDist = linkCost + neighborDist;
-                    }
+                    int newDist = (neighborDist == INF || linkCost == INF) ? INF : linkCost + neighborDist;
                     
                     if (oldDist != newDist) {
                         D[router][dest][neighbor] = newDist;
@@ -167,7 +155,7 @@ int main() {
         }
     }
     
-    // Calculate final routing tables using minimum from distance table
+    // Calculate final routing tables
     for (const string& router : routers) {
         cout << "Routing Table of router " << router << ":" << endl;
         
@@ -185,10 +173,9 @@ int main() {
             }
             sort(neighbors.begin(), neighbors.end());
             
-            // Find minimum cost from distance table
             for (const string& via : neighbors) {
                 int cost = D[router][dest][via];
-                if (cost < minCost) {
+                if (cost < minCost || (cost == minCost && via < nextHop)) {
                     minCost = cost;
                     nextHop = via;
                 }
@@ -222,7 +209,10 @@ int main() {
     }
     
     if (hasUpdates) {
-        // Reinitialize for updates
+        // Reset step counter
+        step = 0;
+        
+        // Reinitialize distance tables
         for (const string& router : routers) {
             for (const string& dest : routers) {
                 if (dest == router) continue;
@@ -230,9 +220,7 @@ int main() {
                     if (via == router) continue;
                     D[router][dest][via] = INF;
                 }
-                if (links[router].count(dest)) {
-                    D[router][dest][dest] = links[router][dest];
-                }
+                D[router][dest][dest] = links[router].count(dest) ? links[router][dest] : INF;
             }
         }
         
@@ -260,9 +248,7 @@ int main() {
         }
         
         // Run algorithm again
-        step = 0;
         changed = true;
-        
         while (changed) {
             changed = false;
             step++;
@@ -277,8 +263,8 @@ int main() {
                         if (via == router) continue;
                         if (links[router].count(via)) {
                             int linkCost = links[router][via];
-                            int pathCost = D[router][dest][via];
-                            if (linkCost != INF && pathCost != INF) {
+                            int pathCost = D[via][dest][dest];
+                            if (pathCost != INF && linkCost != INF) {
                                 int totalCost = linkCost + pathCost;
                                 if (totalCost < minCost) {
                                     minCost = totalCost;
@@ -286,7 +272,7 @@ int main() {
                             }
                         }
                     }
-                    distVectors[router][dest] = minCost;
+                    distVectors[router][dest] = minCost == INF && links[router].count(dest) ? links[router][dest] : minCost;
                 }
             }
             
@@ -295,20 +281,13 @@ int main() {
                     if (neighbor == router || !links[router].count(neighbor)) continue;
                     
                     for (const string& dest : routers) {
-                        if (dest == router) continue;
-                        
-                        if (dest == neighbor) continue;
+                        if (dest == router || dest == neighbor) continue;
                         
                         int oldDist = D[router][dest][neighbor];
                         int neighborDist = distVectors[neighbor][dest];
                         int linkCost = links[router][neighbor];
                         
-                        int newDist;
-                        if (neighborDist == INF) {
-                            newDist = INF;
-                        } else {
-                            newDist = linkCost + neighborDist;
-                        }
+                        int newDist = (neighborDist == INF || linkCost == INF) ? INF : linkCost + neighborDist;
                         
                         if (oldDist != newDist) {
                             D[router][dest][neighbor] = newDist;
@@ -363,7 +342,7 @@ int main() {
                 
                 for (const string& via : neighbors) {
                     int cost = D[router][dest][via];
-                    if (cost < minCost) {
+                    if (cost < minCost || (cost == minCost && via < nextHop)) {
                         minCost = cost;
                         nextHop = via;
                     }
