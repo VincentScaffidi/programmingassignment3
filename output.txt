@@ -1,0 +1,144 @@
+Distance Table of router X at t=0:
+     Y    Z    
+Y    3    9    
+Z    3    9    
+
+Distance Table of router Y at t=0:
+     X    Z    
+X    3    4    
+Z    3    4    
+
+Distance Table of router Z at t=0:
+     X    Y    
+X    9    4    
+Y    9    4    
+
+Distance Table of router X at t=0:
+     Y    Z    
+Y    3    9    
+Z    3    9    
+
+Distance Table of router Y at t=0:
+     X    Z    
+X    3    4    
+Z    3    4    
+
+Distance Table of router Z at t=0:
+     X    Y    
+X    9    4    
+Y    9    4    
+
+Distance Table of router X at t=1:
+     Y    Z    
+Y    INF  7    
+Z    13    INF  
+
+Distance Table of router Y at t=1:
+     X    Z    
+X    INF  10    
+Z    11    INF  
+
+Distance Table of router Z at t=1:
+     X    Y    
+X    INF  12    
+Y    7    INF  
+
+Distance Table of router X at t=2:
+     Y    Z    
+Y    INF  7    
+Z    13    INF  
+
+Distance Table of router Y at t=2:
+     X    Z    
+X    INF  10    
+Z    11    INF  
+
+Distance Table of router Z at t=2:
+     X    Y    
+X    INF  12    
+Y    7    INF  
+
+Routing Table of router X:
+Y,Y,3
+Z,Y,7
+
+Routing Table of router Y:
+X,X,3
+Z,Z,4
+
+Routing Table of router Z:
+X,Y,7
+Y,Y,4
+
+Distance Table of router X at t=0:
+     Y    Z    
+Y    3    1    
+Z    3    1    
+
+Distance Table of router Y at t=0:
+     X    Z    
+X    3    INF  
+Z    3    INF  
+
+Distance Table of router Z at t=0:
+     X    Y    
+X    1    INF  
+Y    1    INF  
+
+Distance Table of router X at t=3:
+     Y    Z    
+Y    INF  7    
+Z    5    INF  
+
+Distance Table of router Y at t=3:
+     X    Z    
+X    INF  4    
+Z    INF  INF  
+
+Distance Table of router Z at t=3:
+     X    Y    
+X    INF  4    
+Y    INF  INF  
+
+Distance Table of router X at t=4:
+     Y    Z    
+Y    INF  7    
+Z    5    INF  
+
+Distance Table of router Y at t=4:
+     X    Z    
+X    INF  4    
+Z    INF  INF  
+
+Distance Table of router Z at t=4:
+     X    Y    
+X    INF  4    
+Y    INF  INF  
+
+Distance Table of router X at t=5:
+     Y    Z    
+Y    INF  7    
+Z    5    INF  
+
+Distance Table of router Y at t=5:
+     X    Z    
+X    INF  4    
+Z    INF  INF  
+
+Distance Table of router Z at t=5:
+     X    Y    
+X    INF  4    
+Y    INF  INF  
+
+Routing Table of router X:
+Y,Y,3
+Z,Z,1
+
+Routing Table of router Y:
+X,X,3
+Z,X,4
+
+Routing Table of router Z:
+X,X,1
+Y,X,4
+
