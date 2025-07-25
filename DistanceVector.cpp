@@ -54,7 +54,7 @@ public:
     bool updateFromNeighbor(const string& neighbor, const map<string, int>& neighborDistances) {
         bool changed = false;
         
-        // Update our knowledge of neighbor's distances to all destinations
+        // Update our distance table with neighbor's distances
         for (const auto& entry : neighborDistances) {
             string dest = entry.first;
             int neighborDist = entry.second;
@@ -69,17 +69,17 @@ public:
         for (const auto& entry : bestDistances) {
             string dest = entry.first;
             int oldBest = bestDistances[dest];
+            string oldNextHop = nextHop[dest];
             int newBest = INF;
             string newNextHop = "";
             
-            // Check all possible next hops (direct neighbors only)
+            // Find minimum cost path: D_x(y) = min_v{c(x,v) + D_v(y)}
             vector<string> neighbors;
             for (const auto& link : directLinks) {
                 neighbors.push_back(link.first);
             }
             sort(neighbors.begin(), neighbors.end()); // Alphabetical order for tie-breaking
             
-            // Apply Bellman-Ford: find minimum cost path
             for (const string& neighbor : neighbors) {
                 int costToNeighbor = directLinks[neighbor];
                 int neighborToDest = distanceTable[dest][neighbor];
@@ -94,7 +94,7 @@ public:
             }
             
             // Check if anything changed (for convergence detection)
-            if (newBest != oldBest || nextHop[dest] != newNextHop) {
+            if (newBest != oldBest || newNextHop != oldNextHop) {
                 bestDistances[dest] = newBest;
                 nextHop[dest] = newNextHop;
                 changed = true;
