@@ -85,6 +85,21 @@ public:
                     }
                 }
             }
+            // Check if anything changed (for convergence detection)
+            if (newBest != oldBest || nextHop[dest] != newNextHop) {
+                bestDistances[dest] = newBest;
+                nextHop[dest] = newNextHop;
+                changed = true;
+            }
+        }
+        
+        return changed; // Return true if any distance changed
+    }
+    
+    // Get this router's distance vector to send to neighbors
+    map<string, int> getDistanceVector() {
+        return bestDistances;
+    }
 
 
     // Print distance table in required format
