@@ -15,33 +15,33 @@ Y    INF  4
 
 Distance Table of router X at t=1:
      Y    Z    
-Y    3    13    
+Y    3    13   
 Z    7    9    
 
 Distance Table of router Y at t=1:
      X    Z    
-X    3    13    
-Z    12    4    
+X    3    13   
+Z    12   4    
 
 Distance Table of router Z at t=1:
      X    Y    
 X    9    7    
-Y    12    4    
+Y    12   4    
 
 Distance Table of router X at t=2:
      Y    Z    
-Y    3    13    
+Y    3    13   
 Z    7    9    
 
 Distance Table of router Y at t=2:
      X    Z    
-X    3    11    
-Z    10    4    
+X    3    11   
+Z    10   4    
 
 Distance Table of router Z at t=2:
      X    Y    
 X    9    7    
-Y    12    4    
+Y    12   4    
 
 Routing Table of router X:
 Y,Y,3
@@ -57,23 +57,23 @@ Y,Y,4
 
 Distance Table of router X at t=3:
      Y    Z    
-Y    3    INF  
-Z    INF  1    
+Y    3    13   
+Z    13   1    
 
 Distance Table of router Y at t=3:
      X    Z    
 X    3    INF  
-Z    INF  INF  
+Z    10   INF  
 
 Distance Table of router Z at t=3:
      X    Y    
 X    1    INF  
-Y    INF  INF  
+Y    4    INF  
 
 Distance Table of router X at t=4:
      Y    Z    
-Y    3    INF  
-Z    INF  1    
+Y    3    5    
+Z    13   1    
 
 Distance Table of router Y at t=4:
      X    Z    
