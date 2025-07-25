@@ -72,6 +72,19 @@ public:
             }
             sort(neighbors.begin(), neighbors.end()); // Alphabetical order for tie-breaking
             
+            // Apply Bellman-Ford: find minimum cost path
+            for (const string& neighbor : neighbors) {
+                int costToNeighbor = directLinks[neighbor];
+                int neighborToDest = distanceTable[dest][neighbor];
+                
+                if (costToNeighbor != INF && neighborToDest != INF) {
+                    int totalCost = costToNeighbor + neighborToDest;
+                    if (totalCost < newBest) {
+                        newBest = totalCost;
+                        newNextHop = neighbor;
+                    }
+                }
+            }
 
 
     // Print distance table in required format
