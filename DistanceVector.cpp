@@ -132,6 +132,31 @@ public:
 };
 
 int main() {
-    // TODO: Complete main function
+    Network network;
+    string line;
+    
+    // Read router names until START
+    while (getline(cin, line)) {
+        if (line == "START") {
+            break;
+        } else if (!line.empty()) {
+            network.addRouter(line);
+        }
+    }
+    
+    // Read initial topology until UPDATE
+    while (getline(cin, line) && line != "UPDATE") {
+        istringstream iss(line);
+        string router1, router2;
+        int cost;
+        
+        if (iss >> router1 >> router2 >> cost) {
+            network.addLink(router1, router2, cost);
+        }
+    }
+    
+    // Run algorithm with initial topology
+    network.runDistanceVector();
+    
     return 0;
 }
