@@ -207,6 +207,7 @@ public:
     }
 };
 
+/ Complete main function with full input handling
 int main() {
     Network network;
     string line;
@@ -214,25 +215,45 @@ int main() {
     // Read router names until START
     while (getline(cin, line)) {
         if (line == "START") {
-            break;
+            // Read topology links until UPDATE
+            while (getline(cin, line) && line != "UPDATE") {
+                istringstream iss(line);
+                string router1, router2;
+                int cost;
+                
+                if (iss >> router1 >> router2 >> cost) {
+                    network.addLink(router1, router2, cost);
+                }
+            }
+            
+            // Run algorithm with initial topology and print results
+            network.runDistanceVector();
+            
+            // Read updates until END
+            bool hasUpdates = false;
+            while (getline(cin, line) && line != "END") {
+                istringstream iss(line);
+                string router1, router2;
+                int cost;
+                
+                if (iss >> router1 >> router2 >> cost) {
+                    network.addLink(router1, router2, cost);
+                    hasUpdates = true;
+                }
+            }
+            
+            // If there were updates, run algorithm again
+            if (hasUpdates) {
+                network.runDistanceVector();
+            }
+            
+            break; // Exit after processing one complete input section
+            
         } else if (!line.empty()) {
+            // Add router name
             network.addRouter(line);
         }
     }
-    
-    // Read initial topology until UPDATE
-    while (getline(cin, line) && line != "UPDATE") {
-        istringstream iss(line);
-        string router1, router2;
-        int cost;
-        
-        if (iss >> router1 >> router2 >> cost) {
-            network.addLink(router1, router2, cost);
-        }
-    }
-    
-    // Run algorithm with initial topology
-    network.runDistanceVector();
     
     return 0;
 }
