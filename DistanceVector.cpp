@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <sstream>
 
 using namespace std;
 
@@ -79,7 +80,55 @@ public:
 };
 
 class Network {
-    // TODO: Implement network management
+private:
+    map<string, Router> routers;
+    vector<string> routerNames;
+    
+public:
+    // Add a router to the network
+    // Maintains alphabetical ordering for consistent output
+    void addRouter(const string& name) {
+        if (routers.find(name) == routers.end()) {
+            routers[name] = Router(name);
+            routerNames.push_back(name);
+            sort(routerNames.begin(), routerNames.end()); // Keep alphabetical order
+        }
+    }
+    
+    // Add or update a link between two routers
+    // Cost of -1 means remove the link
+    void addLink(const string& router1, const string& router2, int cost) {
+        // Ensure both routers exist
+        addRouter(router1);
+        addRouter(router2);
+        
+        if (cost == -1) {
+            // Remove link - bidirectional
+            routers[router1].directLinks.erase(router2);
+            routers[router2].directLinks.erase(router1);
+        } else {
+            // Add/update link - bidirectional since it's undirected network
+            routers[router1].directLinks[router2] = cost;
+            routers[router2].directLinks[router1] = cost;
+        }
+    }
+    
+    // Initialize all routers with current topology
+    void initializeRouters() {
+        for (auto& pair : routers) {
+            pair.second.initialize(routerNames);
+        }
+    }
+    
+    // TODO: Implement the actual Distance Vector algorithm
+    void runDistanceVector() {
+        initializeRouters();
+        
+        // Print initial state
+        for (const string& name : routerNames) {
+            routers[name].printDistanceTable(0, routerNames);
+        }
+    }
 };
 
 int main() {
