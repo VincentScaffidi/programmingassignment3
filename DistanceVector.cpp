@@ -44,7 +44,36 @@ public:
             }
         }
     }
-    
+    bool updateFromNeighbor(const string& neighbor, const map<string, int>& neighborDistances) {
+        bool changed = false;
+        
+        // Update our knowledge of neighbor's distances to all destinations
+        for (const auto& entry : neighborDistances) {
+            string dest = entry.first;
+            int neighborDist = entry.second;
+            
+            if (dest == name) continue; // Skip self
+            
+            // Update distance table with neighbor's reported distance
+            distanceTable[dest][neighbor] = neighborDist;
+        }
+        
+        // Recalculate best distances using Bellman-Ford equation
+        for (const auto& entry : bestDistances) {
+            string dest = entry.first;
+            int oldBest = bestDistances[dest];
+            int newBest = INF;
+            string newNextHop = "";
+            
+            // Check all possible next hops (direct neighbors only)
+            vector<string> neighbors;
+            for (const auto& link : directLinks) {
+                neighbors.push_back(link.first);
+            }
+            sort(neighbors.begin(), neighbors.end()); // Alphabetical order for tie-breaking
+            
+
+
     // Print distance table in required format
     void printDistanceTable(int step, const vector<string>& allRouters) {
         cout << "Distance Table of router " << name << " at t=" << step << ":" << endl;
